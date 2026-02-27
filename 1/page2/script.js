@@ -1,5 +1,7 @@
 function task1() {
-    let month = Number(prompt("Введите номер месяца (1-12):"));
+    let raw = prompt("Введите номер месяца (1-12):");
+    if (raw === null) return;
+    let month = Number(raw);
 
     const months = [
         "Январь", "Февраль", "Март", "Апрель",
@@ -15,7 +17,13 @@ function task1() {
 }
 
 function task2() {
-    let n = Number(prompt("Введите n:"));
+    let raw = prompt("Введите n:");
+    if (raw === null) return;
+    let n = Number(raw);
+    if (!Number.isInteger(n) || n < 1) {
+        alert("Введите натуральное число");
+        return;
+    }
 
     function isPrime(num) {
         if (num < 2) return false;
@@ -49,10 +57,22 @@ function task3() {
         }
     };
 
-    let value1 = Number(prompt("Введите число для add:"));
+    let raw1 = prompt("Введите число для add:");
+    if (raw1 === null) return;
+    let value1 = Number(raw1);
+    if (!Number.isFinite(value1)) {
+        alert("Некорректное число");
+        return;
+    }
     Counter.add(value1);
 
-    let value2 = Number(prompt("Введите число для sub:"));
+    let raw2 = prompt("Введите число для sub:");
+    if (raw2 === null) return;
+    let value2 = Number(raw2);
+    if (!Number.isFinite(value2)) {
+        alert("Некорректное число");
+        return;
+    }
     Counter.sub(value2);
 
     alert("Текущее значение count: " + Counter.count);
@@ -60,11 +80,13 @@ function task3() {
 
 function task4() {
     let words = prompt("Введите слова через запятую:");
+    if (words === null) return;
     alert(words.split(",").join("."));
 }
 
 function task5() {
     let str = prompt("Введите строку:");
+    if (str === null) return;
     let cleaned = str.toLowerCase().replace(/\s/g, "");
 
     if (cleaned === cleaned.split("").reverse().join("")) {

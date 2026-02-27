@@ -1,6 +1,20 @@
+function parseNumberInput(input) {
+    if (input === null) return null;
+    return input
+        .trim()
+        .split(/\s+/)
+        .map(Number)
+        .filter(Number.isFinite);
+}
+
 function task1() {
     let input = prompt("Введите натуральные числа через пробел:");
-    let arr = input.split(" ").map(Number);
+    let arr = parseNumberInput(input);
+    if (arr === null) return;
+    if (arr.length === 0) {
+        alert("Пустой ввод");
+        return;
+    }
 
     arr.sort((a, b) => a - b);
 
@@ -9,7 +23,12 @@ function task1() {
 
 function task2() {
     let input = prompt("Введите натуральные числа через пробел:");
-    let arr = input.split(" ").map(Number);
+    let arr = parseNumberInput(input);
+    if (arr === null) return;
+    if (arr.length === 0) {
+        alert("Пустой ввод");
+        return;
+    }
 
     function modFive(numbers) {
         return numbers.map(num => num % 5);
@@ -31,9 +50,8 @@ function median(...numbers) {
 
 function task3() {
     let input = prompt("Введите числа через пробел:");
-    let arr = input.split(" ")
-                   .map(Number)
-                   .filter(Number.isFinite);
+    let arr = parseNumberInput(input);
+    if (arr === null) return;
 
     if (arr.length === 0) {
         alert("Пустой ввод");
@@ -52,6 +70,7 @@ function task3() {
 
 function task4() {
     let str = prompt("Введите строку из скобок:");
+    if (str === null) return;
     let stack = [];
 
     for (let char of str) {
@@ -83,7 +102,7 @@ function deepCopy(obj) {
     }
 
     let copy = {};
-    for (let key in obj) {
+    for (let key of Object.keys(obj)) {
         copy[key] = deepCopy(obj[key]);
     }
     return copy;
