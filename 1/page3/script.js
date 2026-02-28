@@ -100,13 +100,21 @@ function deepCopy(obj) {
         return obj;
     }
 
-    if (Array.isArray(obj)) {
-        return obj.map(item => deepCopy(item));
-    }
+    let copy;
 
-    let copy = {};
-    for (let key of Object.keys(obj)) {
-        copy[key] = deepCopy(obj[key]);
+    if (Array.isArray(obj)) {
+        copy = [];
+        for (let i = 0; i < obj.length; i++) {
+            copy[i] = deepCopy(obj[i]);
+        }
+    } else {
+        copy = {};
+        for (let key in obj) {
+            if (Object.hasOwn(obj, key) 
+                && typeof obj[key] !== "function") {
+                copy[key] = deepCopy(obj[key]);
+            }
+        }
     }
     return copy;
 }
@@ -115,7 +123,8 @@ function task5() {
     let original = {
         a: 1,
         b: { c: 2 },
-        d: [1, 2, { e: 3 }]
+        d: [1, 2, { e: 3 }],
+        method: function () { return; }
     };
 
     let cloned = deepCopy(original);
@@ -125,7 +134,6 @@ function task5() {
     console.log("Original:", original);
     console.log("Clone:", cloned);
 }
-
 document.getElementById("task1Btn")?.addEventListener("click", task1);
 document.getElementById("task2Btn")?.addEventListener("click", task2);
 document.getElementById("task3Btn")?.addEventListener("click", task3);
