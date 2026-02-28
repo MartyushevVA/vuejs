@@ -42,7 +42,7 @@ function median(...numbers) {
 
     let mid = Math.floor(numbers.length / 2);
 
-    if (numbers.length % 2 === 0) {
+    if (numbers.length % 2 == 0) {
         return (numbers[mid - 1] + numbers[mid]) / 2;
     }
     return numbers[mid];
@@ -62,9 +62,12 @@ function task3() {
 
     let result2 = median.apply(null, arr);
 
+    let result3 = median(arr[0], arr[1], arr[2], arr[3], arr[4]);
+
     alert(
         "Медиана (через распаковку): " + result1 +
-        "\nМедиана (через apply): " + result2
+        "\nМедиана (через apply): " + result2 +
+        "\nМедиана (через запятую по первым 5 числам): " + result3
     );
 }
 
@@ -117,8 +120,15 @@ function task5() {
 
     let cloned = deepCopy(original);
 
-    alert("Объект успешно скопирован.\nПроверьте в консоли.");
+    alert("Объект успешно скопирован.");
 
     console.log("Original:", original);
     console.log("Clone:", cloned);
 }
+
+document.getElementById("task1Btn")?.addEventListener("click", task1);
+document.getElementById("task2Btn")?.addEventListener("click", task2);
+document.getElementById("task3Btn")?.addEventListener("click", task3);
+document.getElementById("task4Btn")?.addEventListener("click", task4);
+document.getElementById("task5Btn")?.addEventListener("click", task5);
+

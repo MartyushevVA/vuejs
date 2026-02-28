@@ -28,7 +28,7 @@ function task2() {
     function isPrime(num) {
         if (num < 2) return false;
         for (let i = 2; i <= Math.sqrt(num); i++) {
-            if (num % i === 0) return false;
+            if (num % i == 0) return false;
         }
         return true;
     }
@@ -87,7 +87,7 @@ function task4() {
 function task5() {
     let str = prompt("Введите строку:");
     if (str === null) return;
-    let cleaned = str.toLowerCase().replace(/\s/g, "");
+    let cleaned = str.toLowerCase().replace(/[\s,]/g, "");
 
     if (cleaned === cleaned.split("").reverse().join("")) {
         alert("Да");
@@ -95,3 +95,9 @@ function task5() {
         alert("Нет");
     }
 }
+
+document.getElementById("task1Btn")?.addEventListener("click", task1);
+document.getElementById("task2Btn")?.addEventListener("click", task2);
+document.getElementById("task3Btn")?.addEventListener("click", task3);
+document.getElementById("task4Btn")?.addEventListener("click", task4);
+document.getElementById("task5Btn")?.addEventListener("click", task5);
