@@ -3,6 +3,33 @@ function clearOutput() {
 }
 
 let activeModalResolver = null;
+let cachedImageUrls = null;
+let cachedImageUrlsPromise = null;
+
+function closeInputModal(overlay, result) {
+    if (!activeModalResolver) {
+        return;
+    }
+
+    const resolver = activeModalResolver;
+    activeModalResolver = null;
+    overlay.style.display = "none";
+    resolver(result);
+}
+
+function bindInputModalEvents(overlay) {
+    const input = overlay.querySelector("#input-modal-field");
+    const okBtn = overlay.querySelector("#input-modal-ok");
+    const cancelBtn = overlay.querySelector("#input-modal-cancel");
+
+    okBtn.addEventListener("click", () => {
+        closeInputModal(overlay, { cancelled: false, value: input.value });
+    });
+
+    cancelBtn.addEventListener("click", () => {
+        closeInputModal(overlay, { cancelled: true, value: null });
+    });
+}
 
 function ensureInputModal() {
     if (document.getElementById("input-modal-overlay")) {
@@ -17,12 +44,10 @@ function ensureInputModal() {
             display: none;
             align-items: center;
             justify-content: center;
-            background: rgba(0, 0, 0, 0.25);
+            background: rgba(0, 0, 0, 0.2);
         }
         #input-modal-box {
-            width: 340px;
             padding: 12px;
-            border: 1px solid #d0d0d0;
             background: #fff;
         }
         #input-modal-title {
@@ -30,20 +55,27 @@ function ensureInputModal() {
         }
         #input-modal-field {
             width: 100%;
-            padding: 8px;
-            margin-bottom: 8px;
-            border: 1px solid #c8c8c8;
+            margin: 0 0 8px;
+            box-sizing: border-box;
         }
         #input-modal-actions {
             display: flex;
             justify-content: flex-end;
+            gap: 8px;
         }
-        #input-modal-actions button {
-            padding: 6px 10px;
-            border: 1px solid #c8c8c8;
+        .task-block {
+            margin-top: 16px;
+            padding: 12px;
+            border: 1px solid #d0d0d0;
+        }
+        .task-block h3 {
+            margin: 0 0 12px;
+        }
+        .task-images {
+            display: flex;
+            flex-wrap: wrap;
         }
     `;
-    document.head.appendChild(style);
 
     const overlay = document.createElement("div");
     overlay.id = "input-modal-overlay";
@@ -57,40 +89,10 @@ function ensureInputModal() {
             </div>
         </div>
     `;
+
     document.body.appendChild(overlay);
-
-    const input = document.getElementById("input-modal-field");
-    const okBtn = document.getElementById("input-modal-ok");
-    const cancelBtn = document.getElementById("input-modal-cancel");
-
-    function closeWithResult(result) {
-        if (!activeModalResolver) {
-            return;
-        }
-
-        const resolver = activeModalResolver;
-        activeModalResolver = null;
-        overlay.style.display = "none";
-        resolver(result);
-    }
-
-    okBtn.addEventListener("click", () => {
-        closeWithResult({ cancelled: false, value: input.value });
-    });
-
-    cancelBtn.addEventListener("click", () => {
-        closeWithResult({ cancelled: true, value: null });
-    });
-
-    input.addEventListener("keydown", (event) => {
-        if (event.key === "Enter") {
-            closeWithResult({ cancelled: false, value: input.value });
-        }
-
-        if (event.key === "Escape") {
-            closeWithResult({ cancelled: true, value: null });
-        }
-    });
+    document.head.appendChild(style);
+    bindInputModalEvents(overlay);
 }
 
 function showInputModal(title, placeholder) {
@@ -130,11 +132,30 @@ async function collectInputs(label, placeholder) {
     return values;
 }
 
+async function getImageUrls() {
+    if (cachedImageUrls !== null) {
+        return cachedImageUrls;
+    }
+
+    if (!cachedImageUrlsPromise) {
+        cachedImageUrlsPromise = collectInputs("URL картинки", "https://...");
+    }
+
+    cachedImageUrls = await cachedImageUrlsPromise;
+    return cachedImageUrls;
+}
+
 function loadImage(url) {
     return new Promise((resolve, reject) => {
         const img = new Image();
 
-        img.onload = () => resolve(img);
+        img.onload = () => {
+            img.style.maxWidth = "180px";
+            img.style.maxHeight = "180px";
+            img.style.objectFit = "contain";
+            img.style.margin = "6px";
+            resolve(img);
+        };
         img.onerror = () => reject(new Error("Can't load image"));
         img.src = url;
     });
@@ -142,12 +163,37 @@ function loadImage(url) {
 
 function createErrorParagraph() {
     const p = document.createElement("p");
-    p.textContent = "Can’t load image";
+    p.textContent = "Can't load image";
     return p;
 }
 
+function getTaskContainer(id, title) {
+    let block = document.getElementById(id);
+
+    if (!block) {
+        block = document.createElement("section");
+        block.id = id;
+        block.className = "task-block";
+        block.innerHTML = `
+            <h3>${title}</h3>
+            <div class="task-images"></div>
+        `;
+        document.getElementById("output").appendChild(block);
+    }
+
+    return block.querySelector(".task-images");
+}
+
+function resetTaskBlocks() {
+    clearOutput();
+    getTaskContainer("task2-block", "Задание 2. Promise по порядку");
+    getTaskContainer("task3-block", "Задание 3. Promise без порядка");
+    getTaskContainer("task4-ordered-block", "Задание 4. async/await по порядку");
+    getTaskContainer("task4-unordered-block", "Задание 4. async/await без порядка");
+}
+
 function showVisitCountOnLoad() {
-    let count = Number(localStorage.getItem("page_load_count") || 0) + 1;
+    const count = Number(localStorage.getItem("page_load_count") || 0) + 1;
     localStorage.setItem("page_load_count", count);
     alert(`Вы загрузили/обновили эту страницу ${count} раз(а).`);
 }
@@ -157,53 +203,50 @@ function task1() {
     alert(`Текущее количество загрузок страницы: ${count}`);
 }
 
-window.onload = showVisitCountOnLoad;
-
-function task2() {
-    const output = document.getElementById("output");
-    collectInputs("URL картинки", "https://...").then((urls) => {
-        if (urls === null) {
-            return;
-        }
-
-        clearOutput();
-
-        const promises = urls.map((url) =>
-            loadImage(url).catch(() => createErrorParagraph())
-        );
-
-        Promise.all(promises).then((elements) => {
-            elements.forEach((element) => output.appendChild(element));
-        });
-    });
-}
-
-function task3() {
-    const output = document.getElementById("output");
-    collectInputs("URL картинки", "https://...").then((urls) => {
-        if (urls === null) {
-            return;
-        }
-
-        clearOutput();
-
-        urls.forEach((url) => {
-            loadImage(url)
-                .then((img) => output.appendChild(img))
-                .catch(() => output.appendChild(createErrorParagraph()));
-        });
-    });
-}
-
-async function task4_ordered() {
-    const output = document.getElementById("output");
-    const urls = await collectInputs("URL картинки", "https://...");
+async function task2() {
+    const output = getTaskContainer("task2-block", "Задание 2. Promise по порядку");
+    const urls = await getImageUrls();
 
     if (urls === null) {
         return;
     }
 
-    clearOutput();
+    output.innerHTML = "";
+
+    const promises = urls.map((url) =>
+        loadImage(url).catch(() => createErrorParagraph())
+    );
+
+    const elements = await Promise.all(promises);
+    elements.forEach((element) => output.appendChild(element));
+}
+
+async function task3() {
+    const output = getTaskContainer("task3-block", "Задание 3. Promise без порядка");
+    const urls = await getImageUrls();
+
+    if (urls === null) {
+        return;
+    }
+
+    output.innerHTML = "";
+
+    urls.forEach((url) => {
+        loadImage(url)
+            .then((img) => output.appendChild(img))
+            .catch(() => output.appendChild(createErrorParagraph()));
+    });
+}
+
+async function task4_ordered() {
+    const output = getTaskContainer("task4-ordered-block", "Задание 4. async/await по порядку");
+    const urls = await getImageUrls();
+
+    if (urls === null) {
+        return;
+    }
+
+    output.innerHTML = "";
 
     const elements = await Promise.all(
         urls.map(async (url) => {
@@ -219,14 +262,14 @@ async function task4_ordered() {
 }
 
 async function task4_unordered() {
-    const output = document.getElementById("output");
-    const urls = await collectInputs("URL картинки", "https://...");
+    const output = getTaskContainer("task4-unordered-block", "Задание 4. async/await без порядка");
+    const urls = await getImageUrls();
 
     if (urls === null) {
         return;
     }
 
-    clearOutput();
+    output.innerHTML = "";
 
     urls.forEach(async (url) => {
         try {
@@ -255,8 +298,7 @@ async function task5() {
         "Afghanistan",
         "China",
         "Venezuela",
-        "Iran",
-        "Russian Federation"
+        "Iran"
     ];
 
     const ips = await collectInputs("IP-адрес", "8.8.8.8");
@@ -281,3 +323,22 @@ async function task5() {
         console.error(error);
     }
 }
+
+async function startImageTasks() {
+    resetTaskBlocks();
+
+    const urls = await getImageUrls();
+    if (urls === null) {
+        return;
+    }
+
+    task2();
+    task3();
+    task4_ordered();
+    task4_unordered();
+}
+
+window.onload = () => {
+    showVisitCountOnLoad();
+    startImageTasks();
+};

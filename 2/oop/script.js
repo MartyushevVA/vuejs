@@ -1,5 +1,40 @@
 let activeInputResolver = null;
 
+function closeInputModal(overlay, result) {
+    if (!activeInputResolver) {
+        return;
+    }
+
+    const resolver = activeInputResolver;
+    activeInputResolver = null;
+    overlay.style.display = "none";
+    resolver(result);
+}
+
+function bindInputModalEvents(overlay) {
+    const inputField = overlay.querySelector("#input-modal-field");
+    const inputOk = overlay.querySelector("#input-modal-ok");
+    const inputCancel = overlay.querySelector("#input-modal-cancel");
+
+    inputOk.addEventListener("click", () => {
+        closeInputModal(overlay, { cancelled: false, value: inputField.value });
+    });
+
+    inputCancel.addEventListener("click", () => {
+        closeInputModal(overlay, { cancelled: true, value: null });
+    });
+
+    inputField.addEventListener("keydown", (event) => {
+        if (event.key === "Enter") {
+            closeInputModal(overlay, { cancelled: false, value: inputField.value });
+        }
+
+        if (event.key === "Escape") {
+            closeInputModal(overlay, { cancelled: true, value: null });
+        }
+    });
+}
+
 function ensureModals() {
     if (document.getElementById("input-modal-overlay")) {
         return;
@@ -13,55 +48,34 @@ function ensureModals() {
             display: none;
             align-items: center;
             justify-content: center;
-            background: rgba(0, 0, 0, 0.25);
-            z-index: 1000;
+            background: rgba(0, 0, 0, 0.2);
         }
-
-        .modal-box {
-            width: min(360px, calc(100vw - 24px));
-            padding: 14px;
-            border: 1px solid #d0d0d0;
-            background: #ffffff;
-            font-family: Arial, sans-serif;
+        #input-modal-box {
+            padding: 12px;
+            background: #fff;
         }
-
-        .modal-title {
-            margin: 0 0 10px;
-            font-size: 14px;
-            font-weight: 700;
+        #input-modal-title {
+            margin: 0 0 8px;
         }
-
-        .modal-input {
+        #input-modal-field {
             width: 100%;
-            padding: 8px;
-            border: 1px solid #c8c8c8;
+            margin: 0 0 8px;
             box-sizing: border-box;
         }
-
-        .modal-actions {
-            margin-top: 10px;
+        #input-modal-actions {
             display: flex;
             justify-content: flex-end;
-            gap: 6px;
         }
-
-        .modal-actions button {
-            padding: 6px 10px;
-            border: 1px solid #c8c8c8;
-            background: #f6f6f6;
-            cursor: pointer;
-        }
-
     `;
     document.head.appendChild(style);
 
     const inputOverlay = document.createElement("div");
     inputOverlay.id = "input-modal-overlay";
     inputOverlay.innerHTML = `
-        <div class="modal-box">
-            <h2 id="input-modal-title" class="modal-title"></h2>
-            <input id="input-modal-field" class="modal-input" type="text" />
-            <div class="modal-actions">
+        <div id="input-modal-box">
+            <h2 id="input-modal-title"></h2>
+            <input id="input-modal-field" type="text" />
+            <div id="input-modal-actions">
                 <button id="input-modal-cancel" type="button">Cancel</button>
                 <button id="input-modal-ok" type="button">OK</button>
             </div>
@@ -69,35 +83,7 @@ function ensureModals() {
     `;
 
     document.body.appendChild(inputOverlay);
-
-    const inputField = document.getElementById("input-modal-field");
-    const inputOk = document.getElementById("input-modal-ok");
-    const inputCancel = document.getElementById("input-modal-cancel");
-
-    function closeInput(result) {
-        if (!activeInputResolver) {
-            return;
-        }
-
-        const resolver = activeInputResolver;
-        activeInputResolver = null;
-        inputOverlay.style.display = "none";
-        resolver(result);
-    }
-
-    inputOk.addEventListener("click", () => closeInput({ cancelled: false, value: inputField.value }));
-    inputCancel.addEventListener("click", () => closeInput({ cancelled: true, value: null }));
-
-    inputField.addEventListener("keydown", (event) => {
-        if (event.key === "Enter") {
-            closeInput({ cancelled: false, value: inputField.value });
-        }
-
-        if (event.key === "Escape") {
-            closeInput({ cancelled: true, value: null });
-        }
-    });
-
+    bindInputModalEvents(inputOverlay);
 }
 
 function showInputModal(title, placeholder) {
