@@ -64,11 +64,10 @@
         <h1>Кликер</h1>
 
         <section>
-            <h2>Кликер со средним количеством кликов за 5 секунд</h2>
-            <p>Общий счётчик сохраняется после перезагрузки страницы, а счётчик сессии работает до обновления вкладки.</p>
+            <h2>Кликер со средним количеством кликов за 10 секунд</h2>
             <div class="value">Всего кликов: <span id="total-count">0</span></div>
             <div>Клики за сессию: <span id="session-count">0</span></div>
-            <div class="value speed">Среднее за 5 секунд: <span id="average-value">0</span> кликов/с</div>
+            <div class="value speed">Среднее за 10 секунд: <span id="average-value">0</span> кликов/с</div>
             <button id="click-button" type="button">Клик</button>
         </section>
     </div>
@@ -82,7 +81,7 @@
 
         let totalClicks = 0;
         let sessionClicks = 0;
-        const testDuration = 5000;
+        const testDuration = 10000;
         let recentClicks = [];
 
         function saveState() {
@@ -115,7 +114,7 @@
             clearOldClicks();
             totalCountElement.textContent = String(totalClicks);
             sessionCountElement.textContent = String(sessionClicks);
-            averageValueElement.textContent = (recentClicks.length / 5).toFixed(2);
+            averageValueElement.textContent = (recentClicks.length / 10).toFixed(1);
         }
 
         clickButton.addEventListener("click", () => {
