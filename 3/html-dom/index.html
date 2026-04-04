@@ -39,14 +39,6 @@
             margin-bottom: 18px;
         }
 
-        .old-price {
-            text-decoration: line-through;
-        }
-
-        .new-price {
-            color: black;
-        }
-
         .task-one-title {
             margin-bottom: 18px;
             font-size: 32px;
@@ -157,8 +149,8 @@
                     <td colspan="2">Информация</td>
                 </tr>
                 <tr>
-                    <td>Старая цена: <span class="old-price">1000 ₽</span></td>
-                    <td>Новая цена: <span class="new-price">500 ₽</span></td>
+                    <td>Старая цена: <span><s>1000</s> ₽</span></td>
+                    <td>Новая цена: <span>500 ₽</span></td>
                 </tr>
             </table>
         </section>
@@ -201,13 +193,12 @@
         </section>
 
         <section>
-            <h2>Калькулятор со скобками и ОПЗ</h2>
+            <h2>Скобочный калькулятор</h2>
             <label for="expression-input"><strong>Введите выражение:</strong></label>
             <input
                 id="expression-input"
                 class="expression-input"
                 type="text"
-                value="(2 + 3) * 4 - 5 / 5"
                 placeholder="Например: (2 + 3) * 4 - 5 / 5"
             >
 
@@ -606,8 +597,6 @@
         });
 
         renderProtectionState();
-        renderBasicDisplay();
-        calculateExpression();
     </script>
 </body>
 </html>
