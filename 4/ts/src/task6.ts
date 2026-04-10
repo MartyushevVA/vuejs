@@ -1,4 +1,3 @@
-// ==================== ADAPTER ====================
 interface Target {
   request(): string;
 }
@@ -19,7 +18,6 @@ class Adapter implements Target {
   }
 }
 
-// ==================== STRATEGY ====================
 interface DiscountStrategy {
   apply(price: number): number;
 }
@@ -46,7 +44,6 @@ class ShoppingCart {
   }
 }
 
-// ==================== OBSERVER ====================
 interface Observer {
   update(message: string): void;
 }
@@ -75,7 +72,6 @@ class ConsoleLogger implements Observer {
   }
 }
 
-// ==================== ПРИМЕРЫ ИСПОЛЬЗОВАНИЯ ====================
 console.log("\n--- ADAPTER ---");
 const oldSystem = new Adaptee();
 const adapter = new Adapter(oldSystem);
